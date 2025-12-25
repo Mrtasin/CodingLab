@@ -15,7 +15,7 @@ const testCaseSchema = new Schema(
       default: false, // sample or hidden test case
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const boilerplateSchema = new Schema(
@@ -30,7 +30,7 @@ const boilerplateSchema = new Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const problemSchema = new Schema(
@@ -91,7 +91,7 @@ const problemSchema = new Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Problem = Model("Problem", problemSchema);
