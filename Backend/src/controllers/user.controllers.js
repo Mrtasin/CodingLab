@@ -16,7 +16,8 @@ const userRegister = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, "This email already regesterd", isFound));
 
-  const uname = email.split("@")[0] + "-" + crypto.randomBytes(4).toString("hex");
+  const uname =
+    email.split("@")[0] + "-" + crypto.randomBytes(4).toString("hex");
 
   const newUser = await User.create({
     fullname,
@@ -50,4 +51,27 @@ const userRegister = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, "User register successfully", newUser));
 });
 
-export { userRegister };
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+
+  if (!token) throw new ApiError(401, "Token is Required");
+
+  const user = await User.findOne({
+    verificationToken: token,
+    verificationExpiry: { $gte: Date.now() },
+  }).select("-password");
+
+  if (!user) throw new ApiError(401, "Token is Expired");
+
+  user.isVerified = true;
+  user.verificationToken = undefined;
+  user.verificationExpiry = undefined;
+
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Email verified successfully", user));
+});
+
+export { userRegister, verifyEmail };
