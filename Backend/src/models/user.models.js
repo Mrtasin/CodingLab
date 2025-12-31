@@ -1,6 +1,8 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import { use } from "react";
 
 const userSchema = new Schema(
   {
@@ -71,6 +73,28 @@ userSchema.methods.createEmailVerificationToken = function () {
   this.verificationExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
 
   return verificationToken;
+};
+
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      username: this.username,
+      fullname: this.fullname,
+      role: this.role,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
+    },
+  );
+};
+
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
+  });
 };
 
 const User = model("User", userSchema);
