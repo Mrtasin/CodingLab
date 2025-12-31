@@ -1,4 +1,4 @@
-import { Schema, Model } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const testCaseSchema = new Schema(
   {
@@ -94,6 +94,6 @@ const problemSchema = new Schema(
   { timestamps: true },
 );
 
-const Problem = Model("Problem", problemSchema);
+const Problem = model("Problem", problemSchema);
 
 export default Problem;
