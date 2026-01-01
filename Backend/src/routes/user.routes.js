@@ -3,12 +3,15 @@ import {
   userRegister,
   verifyEmail,
   userLogin,
+  userLogout,
 } from "../controllers/user.controllers.js";
+import isLoggedIn from "../middlewares/auth.middlewares.js";
 
 const userRoutes = Router();
 
 userRoutes.route("/register").post(userRegister);
 userRoutes.route("/verify/:token").post(verifyEmail);
 userRoutes.route("/login").post(userLogin);
+userRoutes.route("/logout").get(isLoggedIn, userLogout);
 
 export default userRoutes;

@@ -114,4 +114,21 @@ const userLogin = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User logged in successfully", user));
 });
 
-export { userRegister, verifyEmail, userLogin };
+const userLogout = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) throw new ApiError(401, "User not loggedIn");
+
+  const user = await User.findOne({ refreshToken }).select("-password");
+  if (!user) throw new ApiError(401, "User not loggedIn");
+
+  user.refreshToken = undefined;
+  await user.save();
+  return res
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
+    .status(200)
+    .json(new ApiResponse(200, "User logged out successfully", user));
+});
+
+export { userRegister, verifyEmail, userLogin, userLogout };
