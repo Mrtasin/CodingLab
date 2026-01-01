@@ -74,4 +74,44 @@ const verifyEmail = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Email verified successfully", user));
 });
 
-export { userRegister, verifyEmail };
+const userLogin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) throw new ApiError(400, "All fields are required");
+
+  const user = await User.findOne({ email });
+  if (!user) throw new ApiError(401, "User not found");
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) throw new ApiError(401, "Password is incorrect");
+
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  user.password = undefined;
+
+  const accessTokenCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24,
+  };
+
+  const refreshTokenCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 30,
+  };
+
+  return res
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
+    .status(200)
+    .json(new ApiResponse(200, "User logged in successfully", user));
+});
+
+export { userRegister, verifyEmail, userLogin };
