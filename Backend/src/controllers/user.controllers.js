@@ -131,4 +131,16 @@ const userLogout = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User logged out successfully", user));
 });
 
-export { userRegister, verifyEmail, userLogin, userLogout };
+const getProfile = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId) throw new ApiError(401, "User Not LoggedIn");
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) throw new ApiError("401", "Invalid Session");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Fatching Profile Successfully", user));
+});
+
+export { userRegister, verifyEmail, userLogin, userLogout, getProfile };
