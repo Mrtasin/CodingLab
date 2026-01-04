@@ -4,6 +4,7 @@ import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
 import crypto from "crypto";
 import mailSender from "../utils/emailSender.js";
+import fileUploadOnCloudinary from "../utils/cloudinary.js";
 
 const userRegister = asyncHandler(async (req, res) => {
   const { fullname, email, password, gender } = req.body;
@@ -143,4 +144,26 @@ const getProfile = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Fatching Profile Successfully", user));
 });
 
-export { userRegister, verifyEmail, userLogin, userLogout, getProfile };
+const uploadAvatar = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId) throw new ApiError(401, "User Not LoggedIn");
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) throw new ApiError("401", "Invalid Session");
+    console.log(req.file)
+  const  avatar  = req.file;
+  if (!avatar) throw new ApiError(400, "Avatar is required");
+
+  const response = await fileUploadOnCloudinary(avatar.path);
+
+  if (response == null) throw new ApiError(401, "Error for uploding file");
+
+  user.avatar = response;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Fatching Profile Successfully", user));
+});
+
+export { userRegister, verifyEmail, userLogin, userLogout, getProfile, uploadAvatar };
