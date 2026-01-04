@@ -150,8 +150,8 @@ const uploadAvatar = asyncHandler(async (req, res) => {
 
   const user = await User.findById(userId).select("-password -refreshToken");
   if (!user) throw new ApiError("401", "Invalid Session");
-    console.log(req.file)
-  const  avatar  = req.file;
+  console.log(req.file);
+  const avatar = req.file;
   if (!avatar) throw new ApiError(400, "Avatar is required");
 
   const response = await fileUploadOnCloudinary(avatar.path);
@@ -163,7 +163,44 @@ const uploadAvatar = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "Fatching Profile Successfully", user));
+    .json(new ApiResponse(200, "Uploding Profile Picture Successfully", user));
 });
 
-export { userRegister, verifyEmail, userLogin, userLogout, getProfile, uploadAvatar };
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) throw new ApiError(400, "Email Id is required");
+
+  const user = await User.findOne({ email });
+  if (!user)
+    throw new ApiError(404, "Not Found User").select("-password -refreshToken");
+
+  const token = user.createResetVerificationToken();
+
+  const option = {
+    name: user.fullname,
+    email: user.email,
+    subject: "Reset Password",
+    instructions: `Click on the link below to Reset your account password:`,
+    link: `${process.env.BASE_URL}/api/v1/users/reset-password/${token}`,
+  };
+
+  await mailSender(option);
+
+  await user.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Send Email Successfully for reset password", user),
+    );
+});
+
+export {
+  userRegister,
+  verifyEmail,
+  userLogin,
+  userLogout,
+  getProfile,
+  uploadAvatar,
+  forgotPassword,
+};

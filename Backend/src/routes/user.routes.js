@@ -6,6 +6,7 @@ import {
   userLogout,
   getProfile,
   uploadAvatar,
+  forgotPassword,
 } from "../controllers/user.controllers.js";
 import isLoggedIn from "../middlewares/auth.middlewares.js";
 import upload from "../middlewares/multer.middlewares.js";
@@ -17,6 +18,7 @@ userRoutes.route("/verify/:token").post(verifyEmail);
 userRoutes.route("/login").post(userLogin);
 userRoutes.route("/logout").get(isLoggedIn, userLogout);
 userRoutes.route("/me").get(isLoggedIn, getProfile);
+userRoutes.route("/forgot-password").post(forgotPassword);
 userRoutes
   .route("/profile-picture")
   .post(isLoggedIn, upload.single("avatar"), uploadAvatar);

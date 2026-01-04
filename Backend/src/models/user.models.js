@@ -74,6 +74,14 @@ userSchema.methods.createEmailVerificationToken = function () {
   return verificationToken;
 };
 
+userSchema.methods.createResetVerificationToken = function () {
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  this.resetVerificationToken = verificationToken;
+  this.resetVerificationExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  return verificationToken;
+};
+
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
