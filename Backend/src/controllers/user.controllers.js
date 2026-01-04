@@ -195,6 +195,39 @@ const forgotPassword = asyncHandler(async (req, res) => {
     );
 });
 
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+  if (!token) throw new ApiError(400, "Token is required");
+
+  const { password } = req.body;
+  if (!password) throw new ApiError(400, "Password is required");
+
+  const user = await User.findOne({
+    resetVerificationToken: token,
+    resetVerificationExpiry: { $gte: Date.now() },
+  });
+  if (!user) throw new ApiError(401, "Token is invalid and loss session");
+
+  if (user.comparePassword(password))
+    throw new ApiError(
+      401,
+      "This password already set, Use Different password",
+    );
+
+  user.password = password;
+  user.resetVerificationExpiry = undefined;
+  user.resetVerificationToken = undefined;
+  user.refreshToken = undefined;
+
+  await user.save();
+
+  user.password = undefined;
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, " Password Reset Successfully", user));
+});
+
 export {
   userRegister,
   verifyEmail,
@@ -203,4 +236,5 @@ export {
   getProfile,
   uploadAvatar,
   forgotPassword,
+  resetPassword,
 };
