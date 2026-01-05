@@ -256,6 +256,34 @@ const changePassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Password Change Successfully", user));
 });
 
+const resendVerificationEmail = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId) throw new ApiError(401, "User Not LoggedIn");
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) throw new ApiError(401, "Invalid Session");
+
+  if (user.isVerified) throw new ApiError(401, "Email is already verified");
+
+  const token = user.createEmailVerificationToken();
+
+  const option = {
+    name: user.fullname,
+    email: user.email,
+    subject: "Email Verification",
+    instructions: `Click on the link below to verify your account:`,
+    link: `${process.env.BASE_URL}/api/v1/users/verify/${token}`,
+  };
+
+  await mailSender(option);
+
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Send Email Successfully", user));
+});
+
 export {
   userRegister,
   verifyEmail,
@@ -266,4 +294,5 @@ export {
   forgotPassword,
   resetPassword,
   changePassword,
+  resendVerificationEmail,
 };

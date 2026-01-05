@@ -9,6 +9,7 @@ import {
   forgotPassword,
   resetPassword,
   changePassword,
+  resendVerificationEmail,
 } from "../controllers/user.controllers.js";
 import isLoggedIn from "../middlewares/auth.middlewares.js";
 import upload from "../middlewares/multer.middlewares.js";
@@ -26,5 +27,8 @@ userRoutes.route("/change-password").post(isLoggedIn, changePassword);
 userRoutes
   .route("/profile-picture")
   .post(isLoggedIn, upload.single("avatar"), uploadAvatar);
+userRoutes
+  .route("/resend-verification-email")
+  .get(isLoggedIn, resendVerificationEmail);
 
 export default userRoutes;
