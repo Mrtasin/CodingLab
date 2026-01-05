@@ -228,6 +228,34 @@ const resetPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, " Password Reset Successfully", user));
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId) throw new ApiError(401, "User Not LoggedIn");
+
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword)
+    throw new ApiError(400, "All fields are required");
+
+  if (oldPassword === newPassword)
+    throw new ApiError(400, "New password must be different from old password");
+
+  const user = await User.findById(userId);
+  if (!user) throw new ApiError(401, "Invalid Session");
+
+  if (!user.comparePassword(oldPassword))
+    throw new ApiError(401, "Password is incorrect");
+
+  user.password = newPassword;
+  await user.save();
+
+  user.password = undefined;
+  user.refreshToken = undefined;
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Password Change Successfully", user));
+});
+
 export {
   userRegister,
   verifyEmail,
@@ -237,4 +265,5 @@ export {
   uploadAvatar,
   forgotPassword,
   resetPassword,
+  changePassword,
 };
