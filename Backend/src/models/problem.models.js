@@ -1,4 +1,9 @@
 import { Schema, model } from "mongoose";
+import {
+  difficultyLevelsArray,
+  languageNames,
+  languageNamesArray,
+} from "../utils/constant.js";
 
 const testCaseSchema = new Schema(
   {
@@ -22,7 +27,7 @@ const boilerplateSchema = new Schema(
   {
     language: {
       type: String,
-      enum: ["PYTHON", "CPP", "JAVASCRIPT"],
+      enum: languageNamesArray,
       required: true,
     },
     code: {
@@ -50,7 +55,8 @@ const problemSchema = new Schema(
     },
     difficulty: {
       type: String,
-      enum: ["EASY", "MEDIUM", "HARD"],
+      enum: difficultyLevelsArray,
+      required: true,
     },
     inputFormat: {
       type: String,
@@ -74,7 +80,7 @@ const problemSchema = new Schema(
     boilerplateCode: [boilerplateSchema],
     supportedLanguages: {
       type: [String],
-      default: ["PYTHON"],
+      default: languageNames.PYTHON,
     },
     timeLimit: {
       type: Number,
