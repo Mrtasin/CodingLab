@@ -11,4 +11,12 @@ const runCode = asyncHandler(async (req, res) => {});
 
 const getAllSubmissions = asyncHandler(async (req, res) => {});
 
-export { createSubmission, getSubmissionById, runCode, getAllSubmissions };
+const getSubmissionCount = asyncHandler(async (req, res) => {});
+
+export {
+  createSubmission,
+  getSubmissionById,
+  runCode,
+  getAllSubmissions,
+  getSubmissionCount,
+};
